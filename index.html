@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barter System Quiz & QR Code Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- QRCode.js Library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth custom transitions */
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Ensure QR code images/canvases scale nicely inside containers */
+        #start-qr-container img, #start-qr-container canvas,
+        #modal-qr-container img, #modal-qr-container canvas {
+            margin: 0 auto;
+            border-radius: 0.5rem;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex flex-col antialiased selection:bg-amber-200 selection:text-amber-900">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+            <!-- Brand / Title -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
+                    <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-base sm:text-lg text-stone-900 leading-tight">Barter & Trade Quiz</h1>
+                    <p class="text-xs text-stone-500 hidden sm:block">Economics Foundations • 5 Questions</p>
+                </div>
+            </div>
+
+            <!-- Action Button: Show / Share QR Code -->
+            <button id="header-qr-btn" type="button"
+                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-sm font-medium transition-all shadow-sm cursor-pointer">
+                <i data-lucide="qr-code" class="w-4 h-4 text-amber-400"></i>
+                <span>Show / Share QR Code</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center">
+
+        <!-- VIEW 1: START / LANDING SCREEN -->
+        <section id="start-screen" class="fade-in">
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-xl shadow-stone-200/40 overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12">
+                    
+                    <!-- Left Column: Quiz Intro & Start CTA -->
+                    <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold tracking-wide uppercase mb-4">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                Interactive Knowledge Check
+                            </div>
+                            <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-4">
+                                Master the Mechanics of the Barter System
+                            </h2>
+                            <p class="text-stone-600 text-base leading-relaxed mb-6">
+                                Before coins, paper bills, and digital banking, humanity traded goods and services directly. Test your understanding of how ancient trade worked—and why it eventually needed money.
+                            </p>
+
+                            <!-- Topics Covered Pills -->
+                            <div class="space-y-2.5 mb-8">
+                                <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">5 Core Concepts Covered:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/70">Double Coincidence of Wants</span>
+                                    <span class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/70">Indivisibility of Goods</span>
+                                    <span class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/70">Common Measure of Value</span>
+                                    <span class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/70">Storing Wealth</span>
+                                    <span class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/70">Historical Examples</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                            <button id="start-quiz-btn" type="button"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white font-semibold text-base shadow-md shadow-amber-600/20 transition-all cursor-pointer">
+                                <span>Start 5-Question Quiz</span>
+                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                            <span class="text-xs text-stone-500 text-center sm:text-left px-2">
+                                Takes ~2 minutes • Instant explanations
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Scannable QR Code Card -->
+                    <div class="lg:col-span-5 bg-stone-100/80 border-t lg:border-t-0 lg:border-l border-stone-200 p-6 sm:p-8 flex flex-col items-center justify-center text-center">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200/90 mb-4">
+                            <!-- QR Code rendered here automatically -->
+                            <div id="start-qr-container" class="w-44 h-44 flex items-center justify-center bg-white"></div>
+                        </div>
+                        <h3 class="font-display font-bold text-stone-900 text-base mb-1">Scan to Play on Mobile</h3>
+                        <p class="text-xs text-stone-500 max-w-xs mb-4 leading-relaxed">
+                            Point your phone's camera at this QR code to open the quiz directly on your device, or download it for a classroom/presentation.
+                        </p>
+                        <div class="flex items-center gap-2 w-full max-w-xs">
+                            <button id="start-download-qr-btn" type="button"
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 text-xs font-semibold transition-colors cursor-pointer">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                <span>Save PNG</span>
+                            </button>
+                            <button id="start-customize-qr-btn" type="button"
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 text-xs font-semibold transition-colors cursor-pointer">
+                                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                <span>Edit URL</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: ACTIVE QUIZ SCREEN -->
+        <section id="quiz-screen" class="hidden fade-in">
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-xl shadow-stone-200/40 p-6 sm:p-10">
+                
+                <!-- Progress & Live Score Header -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-2">
+                        <span id="question-counter" class="text-sm font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-lg">
+                            Question 1 of 5
+                        </span>
+                        <span id="question-topic-badge" class="text-xs font-medium text-stone-500 bg-stone-100 px-2.5 py-1 rounded-lg hidden sm:inline-block">
+                            Double Coincidence of Wants
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm font-semibold text-stone-700">
+                        <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+                        <span>Score: <span id="live-score" class="text-stone-900">0</span> / 5</span>
+                    </div>
+                </div>
+
+                <!-- Visual Progress Bar -->
+                <div class="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden mb-8">
+                    <div id="progress-bar" class="h-full bg-amber-500 rounded-full transition-all duration-500 ease-out" style="width: 20%"></div>
+                </div>
+
+                <!-- Question Prompt -->
+                <h2 id="question-text" class="font-display text-xl sm:text-2xl font-bold text-stone-900 leading-snug mb-6">
+                    Question text goes here...
+                </h2>
+
+                <!-- Multiple-Choice Options Container -->
+                <div id="options-container" class="space-y-3 mb-6">
+                    <!-- Options injected dynamically -->
+                </div>
+
+                <!-- Instant Feedback & Explanation Box -->
+                <div id="feedback-box" class="hidden rounded-2xl p-5 mb-6 border transition-all">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="mt-0.5 shrink-0"></div>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-base mb-1">Correct!</h4>
+                            <p id="feedback-explanation" class="text-sm leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex items-center justify-between pt-4 border-t border-stone-100">
+                    <button id="quit-quiz-btn" type="button"
+                        class="text-sm font-medium text-stone-500 hover:text-stone-800 px-3 py-2 rounded-lg transition-colors cursor-pointer">
+                        ← Back to Start
+                    </button>
+                    <button id="next-question-btn" type="button" disabled
+                        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed text-white font-semibold text-sm transition-all cursor-pointer">
+                        <span id="next-btn-text">Next Question</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- VIEW 3: RESULTS & REVIEW SCREEN -->
+        <section id="results-screen" class="hidden fade-in">
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-xl shadow-stone-200/40 p-6 sm:p-10">
+                
+                <!-- Score Summary Banner -->
+                <div class="text-center max-w-xl mx-auto mb-8">
+                    <div id="result-badge-icon" class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 shadow-xs">
+                        <i data-lucide="trophy" class="w-8 h-8"></i>
+                    </div>
+                    <h2 id="result-heading" class="font-display text-2xl sm:text-3xl font-extrabold text-stone-900 mb-2">
+                        Quiz Complete!
+                    </h2>
+                    <p id="result-subtext" class="text-stone-600 text-sm sm:text-base mb-5">
+                        Here is how you performed on the Barter System challenge.
+                    </p>
+                    <div class="inline-flex items-baseline gap-2 px-6 py-3 rounded-2xl bg-stone-100 border border-stone-200">
+                        <span id="final-score" class="font-display text-4xl font-extrabold text-amber-600">5</span>
+                        <span class="text-lg font-semibold text-stone-500">/ 5 Correct</span>
+                    </div>
+                </div>
+
+                <!-- Answer Breakdown -->
+                <div class="mb-8">
+                    <h3 class="font-display font-bold text-stone-900 text-base mb-4 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-5 h-5 text-amber-600"></i>
+                        <span>Question-by-Question Review</span>
+                    </h3>
+                    <div id="review-list" class="space-y-3">
+                        <!-- Review items injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Bottom Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-stone-100">
+                    <button id="retake-quiz-btn" type="button"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm shadow-md shadow-amber-600/20 transition-all cursor-pointer">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        <span>Retake Quiz</span>
+                    </button>
+                    <button id="results-share-qr-btn" type="button"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-sm transition-all cursor-pointer">
+                        <i data-lucide="qr-code" class="w-4 h-4 text-amber-400"></i>
+                        <span>Share Quiz QR Code</span>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-stone-400">
+        <p>Interactive Economics Quiz • Scan the QR code anytime to open on mobile</p>
+    </footer>
+
+    <!-- MODAL: SHOW / SHARE / CUSTOMIZE QR CODE -->
+    <div id="qr-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-stone-200 fade-in relative">
+            
+            <!-- Close Button -->
+            <button id="close-modal-btn" type="button" aria-label="Close modal"
+                class="absolute top-5 right-5 w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition-colors cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amber-100 text-amber-700 mb-3">
+                    <i data-lucide="qr-code" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-display text-xl font-bold text-stone-900">Scan to Open Quiz</h3>
+                <p class="text-xs text-stone-500 mt-1">
+                    Scan with any smartphone camera to launch this 5-question Barter System quiz.
+                </p>
+            </div>
+
+            <!-- Modal QR Display Box -->
+            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-5 flex flex-col items-center justify-center mb-5">
+                <div id="modal-qr-container" class="bg-white p-3 rounded-xl shadow-xs border border-stone-200/80"></div>
+            </div>
+
+            <!-- Editable URL Input (for local file or hosted URL updates) -->
+            <div class="mb-5">
+                <label for="qr-url-input" class="block text-xs font-semibold text-stone-700 mb-1.5">
+                    Target Website URL (auto-detected, or paste hosted link):
+                </label>
+                <div class="flex gap-2">
+                    <input id="qr-url-input" type="url" placeholder="https://your-hosted-quiz-link.com"
+                        class="flex-1 px-3.5 py-2 rounded-xl border border-stone-300 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                    <button id="copy-url-btn" type="button"
+                        class="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors shrink-0 cursor-pointer">
+                        Copy
+                    </button>
+                </div>
+                <p id="local-file-hint" class="hidden text-[11px] text-amber-700 mt-1.5 leading-snug">
+                    Note: You are currently viewing a local/preview file. Once hosted online (e.g., GitHub Pages, Netlify, or Vercel), paste its public link above to update the QR code for phones.
+                </p>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="grid grid-cols-2 gap-3">
+                <button id="modal-download-btn" type="button"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold transition-colors cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Download QR</span>
+                </button>
+                <button id="modal-done-btn" type="button"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-sm font-semibold transition-colors cursor-pointer">
+                    <span>Done</span>
+                </button>
+            </div>
+
+            <!-- Toast Notification inside modal -->
+            <div id="modal-toast" class="hidden mt-3 text-center text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 py-2 px-3 rounded-xl">
+                Link copied to clipboard!
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        /**
+         * 5 Core Questions on the Barter System
+         * Covers:
+         * 1. Double coincidence of wants
+         * 2. Indivisibility of goods
+         * 3. Lack of a common measure of value
+         * 4. Difficulty in storing wealth
+         * 5. Historical barter examples
+         */
+        const quizQuestions = [
+            {
+                id: 1,
+                topic: "Double Coincidence of Wants",
+                question: "What is meant by the 'double coincidence of wants' in a barter system?",
+                options: [
+                    "Two traders must independently invent the exact same product at the same time.",
+                    "Both parties must each possess the exact good the other desires and be willing to swap.",
+                    "Every trade requires two identical items to be exchanged for every one service.",
+                    "A buyer must pay twice the market value when trading without metal coins."
+                ],
+                correctIndex: 1,
+                explanation: "In a barter economy, trade only occurs if Person A has what Person B wants AND Person B simultaneously has what Person A wants—a costly search problem known as the double coincidence of wants."
+            },
+            {
+                id: 2,
+                topic: "Indivisibility of Goods",
+                question: "A farmer owns a live cow worth 20 sacks of grain, but only wants to buy 2 sacks of grain from a baker. Which limitation of barter does this illustrate?",
+                options: [
+                    "Indivisibility of certain goods",
+                    "Hyperinflation of agricultural commodities",
+                    "Excess supply of fiat currency",
+                    "Instant perishability of livestock"
+                ],
+                correctIndex: 0,
+                explanation: "Many valuable goods—such as livestock, tools, or plows—cannot be divided into smaller pieces without destroying their value or utility, making small everyday purchases nearly impossible."
+            },
+            {
+                id: 3,
+                topic: "Lack of a Common Measure of Value",
+                question: "Why is pricing goods difficult in an economy that relies purely on barter?",
+                options: [
+                    "Governments outlaw writing down exchange ratios.",
+                    "Goods cannot be transported across village borders.",
+                    "There is no single standard unit of account, requiring countless separate exchange rates between every pair of goods.",
+                    "All goods are automatically assigned the exact same value."
+                ],
+                correctIndex: 2,
+                explanation: "Without a common unit of account (like dollars or rupees), every good must be valued in terms of every other good—meaning 100 different goods would require 4,950 separate exchange ratios!"
+            },
+            {
+                id: 4,
+                topic: "Difficulty in Storing Wealth",
+                question: "Why is storing wealth for the future especially challenging under a barter system?",
+                options: [
+                    "Barter contracts legally expire after 30 days.",
+                    "Many traded goods (like fruit, milk, or grain) are perishable, bulky, or costly to maintain over time.",
+                    "Ancient societies had no concept of saving for emergencies.",
+                    "Goods automatically lose half their weight every winter."
+                ],
+                correctIndex: 1,
+                explanation: "When wealth is held in physical commodities like crops, fish, or cattle, it can rot, spoil, get eaten by pests, or require expensive storage and feeding—unlike durable money."
+            },
+            {
+                id: 5,
+                topic: "Historical Barter Examples",
+                question: "Which of the following is a well-documented historical example of early barter and commodity exchange?",
+                options: [
+                    "Ancient Mesopotamians trading grain, livestock, and oils, or Phoenicians swapping purple dye and timber across the Mediterranean",
+                    "Medieval European merchants using contactless smartcards to settle wool trades",
+                    "Roman citizens scanning clay tablets to transfer central bank digital currency",
+                    "19th-century bankers issuing paper checks backed by algorithmic tokens"
+                ],
+                correctIndex: 0,
+                explanation: "Ancient Mesopotamians (around 6000 BCE) and Phoenician seafarers famously bartered staples like grain, cattle, cedar wood, and Tyrian purple dye before standardized coinage became widespread."
+            }
+        ];
+
+        // Application State
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = []; // Stores { questionIndex, selectedIndex, isCorrect }
+        let hasAnsweredCurrent = false;
+        let currentTargetUrl = "";
+
+        // DOM References
+        const startScreen = document.getElementById("start-screen");
+        const quizScreen = document.getElementById("quiz-screen");
+        const resultsScreen = document.getElementById("results-screen");
+
+        const questionCounter = document.getElementById("question-counter");
+        const questionTopicBadge = document.getElementById("question-topic-badge");
+        const liveScoreEl = document.getElementById("live-score");
+        const progressBar = document.getElementById("progress-bar");
+        const questionText = document.getElementById("question-text");
+        const optionsContainer = document.getElementById("options-container");
+
+        const feedbackBox = document.getElementById("feedback-box");
+        const feedbackIcon = document.getElementById("feedback-icon");
+        const feedbackTitle = document.getElementById("feedback-title");
+        const feedbackExplanation = document.getElementById("feedback-explanation");
+        const nextQuestionBtn = document.getElementById("next-question-btn");
+        const nextBtnText = document.getElementById("next-btn-text");
+
+        // QR & Modal References
+        const startQrContainer = document.getElementById("start-qr-container");
+        const modalQrContainer = document.getElementById("modal-qr-container");
+        const qrModal = document.getElementById("qr-modal");
+        const qrUrlInput = document.getElementById("qr-url-input");
+        const localFileHint = document.getElementById("local-file-hint");
+        const modalToast = document.getElementById("modal-toast");
+
+        /**
+         * Determines the initial URL for the QR code.
+         * Uses window.location.href if hosted via http/https, or provides a clean fallback URL if opened in a sandbox/file context.
+         */
+        function getInitialShareUrl() {
+            const href = window.location.href;
+            if (href && (href.startsWith("http://") || href.startsWith("https://")) && !href.includes("about:srcdoc")) {
+                return href;
+            }
+            // Fallback example URL if running in an embedded iframe or local file://
+            return window.location.origin && window.location.origin !== "null"
+                ? window.location.origin + window.location.pathname
+                : "https://barter-system-quiz.example.com";
+        }
+
+        /**
+         * Renders QR Codes into both the Start Card and the Share Modal
+         */
+        function renderQRCodes(url) {
+            const cleanUrl = (url || "").trim() || getInitialShareUrl();
+            currentTargetUrl = cleanUrl;
+
+            try {
+                // Clear existing QR elements
+                startQrContainer.innerHTML = "";
+                modalQrContainer.innerHTML = "";
+
+                // Generate Start Screen QR (168x168)
+                new QRCode(startQrContainer, {
+                    text: cleanUrl,
+                    width: 168,
+                    height: 168,
+                    colorDark: "#1c1917", // stone-900
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+
+                // Generate Modal QR (220x220)
+                new QRCode(modalQrContainer, {
+                    text: cleanUrl,
+                    width: 220,
+                    height: 220,
+                    colorDark: "#1c1917",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (err) {
+                console.error("QR Code generation error:", err);
+                startQrContainer.innerHTML = `<p class="text-xs text-red-600 p-2">Unable to render QR for this URL length.</p>`;
+            }
+        }
+
+        /**
+         * Downloads the rendered QR Code as a PNG file
+         */
+        function downloadQRCode(containerEl) {
+            try {
+                const canvas = containerEl.querySelector("canvas");
+                const img = containerEl.querySelector("img");
+                let dataUrl = "";
+
+                if (canvas) {
+                    dataUrl = canvas.toDataURL("image/png");
+                } else if (img && img.src) {
+                    dataUrl = img.src;
+                }
+
+                if (!dataUrl) {
+                    showModalToast("QR image is still rendering. Please try again.");
+                    return;
+                }
+
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "barter-system-quiz-qr.png";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showModalToast("QR Code PNG downloaded!");
+            } catch (err) {
+                console.error("Download error:", err);
+            }
+        }
+
+        /**
+         * Shows a subtle notification message in the QR Modal
+         */
+        function showModalToast(message) {
+            modalToast.textContent = message;
+            modalToast.classList.remove("hidden");
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                modalToast.classList.add("hidden");
+            }, 2600);
+        }
+
+        /**
+         * Opens the QR Modal
+         */
+        function openQrModal(focusInput = false) {
+            qrModal.classList.remove("hidden");
+            qrModal.classList.add("flex");
+            qrUrlInput.value = currentTargetUrl;
+
+            // Show helpful note if running locally or in an iframe
+            const rawHref = window.location.href;
+            if (!rawHref.startsWith("http") || rawHref.includes("srcdoc") || rawHref.includes("localhost")) {
+                localFileHint.classList.remove("hidden");
+            } else {
+                localFileHint.classList.add("hidden");
+            }
+
+            if (focusInput) {
+                setTimeout(() => {
+                    qrUrlInput.focus();
+                    qrUrlInput.select();
+                }, 100);
+            }
+        }
+
+        /**
+         * Closes the QR Modal
+         */
+        function closeQrModal() {
+            qrModal.classList.add("hidden");
+            qrModal.classList.remove("flex");
+        }
+
+        /**
+         * Switch Visible View
+         */
+        function showScreen(screenEl) {
+            [startScreen, quizScreen, resultsScreen].forEach(el => el.classList.add("hidden"));
+            screenEl.classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        /**
+         * Starts or Resets the Quiz
+         */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            hasAnsweredCurrent = false;
+            liveScoreEl.textContent = "0";
+            showScreen(quizScreen);
+            renderQuestion();
+        }
+
+        /**
+         * Renders the current question and its 4 choices
+         */
+        function renderQuestion() {
+            hasAnsweredCurrent = false;
+            const q = quizQuestions[currentQuestionIndex];
+            const total = quizQuestions.length;
+
+            // Update header & progress
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${total}`;
+            questionTopicBadge.textContent = q.topic;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / total) * 100}%`;
+            questionText.textContent = q.question;
+
+            // Reset feedback and next button
+            feedbackBox.classList.add("hidden");
+            nextQuestionBtn.disabled = true;
+            nextBtnText.textContent = currentQuestionIndex === total - 1 ? "See Final Score" : "Next Question";
+
+            // Render Options
+            optionsContainer.innerHTML = "";
+            const letters = ["A", "B", "C", "D"];
+
+            q.options.forEach((optionText, idx) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.dataset.index = idx;
+                btn.className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-stone-200 hover:border-amber-400 hover:bg-amber-50/40 transition-all flex items-start gap-3.5 group cursor-pointer";
+
+                btn.innerHTML = `
+                    <span class="option-letter w-7 h-7 rounded-lg bg-stone-100 group-hover:bg-amber-100 text-stone-700 group-hover:text-amber-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                        ${letters[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base font-medium text-stone-800 leading-snug flex-1">${optionText}</span>
+                    <span class="option-status shrink-0 mt-0.5"></span>
+                `;
+
+                btn.addEventListener("click", () => handleSelectOption(idx));
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        /**
+         * Handles Option Selection & Instant Feedback
+         */
+        function handleSelectOption(selectedIndex) {
+            if (hasAnsweredCurrent) return;
+            hasAnsweredCurrent = true;
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.correctIndex;
+
+            if (isCorrect) {
+                score++;
+                liveScoreEl.textContent = score;
+            }
+
+            userAnswers.push({
+                questionIndex: currentQuestionIndex,
+                selectedIndex,
+                isCorrect
+            });
+
+            // Style all option buttons to reflect right/wrong answer
+            const optionBtns = optionsContainer.querySelectorAll(".option-btn");
+            optionBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove("hover:border-amber-400", "hover:bg-amber-50/40", "cursor-pointer");
+                btn.classList.add("cursor-default");
+
+                const letterBadge = btn.querySelector(".option-letter");
+                const statusSlot = btn.querySelector(".option-status");
+
+                if (idx === q.correctIndex) {
+                    btn.classList.remove("border-stone-200");
+                    btn.classList.add("border-emerald-500", "bg-emerald-50/70");
+                    letterBadge.classList.remove("bg-stone-100", "text-stone-700");
+                    letterBadge.classList.add("bg-emerald-600", "text-white");
+                    statusSlot.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>`;
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove("border-stone-200");
+                    btn.classList.add("border-rose-500", "bg-rose-50/70");
+                    letterBadge.classList.remove("bg-stone-100", "text-stone-700");
+                    letterBadge.classList.add("bg-rose-600", "text-white");
+                    statusSlot.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-rose-600"></i>`;
+                } else {
+                    btn.classList.add("opacity-60");
+                }
+            });
+
+            // Show Instant Explanation Box
+            feedbackBox.classList.remove("hidden", "bg-emerald-50", "border-emerald-200", "bg-rose-50", "border-rose-200");
+            if (isCorrect) {
+                feedbackBox.classList.add("bg-emerald-50", "border-emerald-200");
+                feedbackIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>`;
+                feedbackTitle.textContent = "Spot on! That's correct.";
+                feedbackTitle.className = "font-bold text-base mb-1 text-emerald-900";
+                feedbackExplanation.className = "text-sm leading-relaxed text-emerald-800";
+            } else {
+                feedbackBox.classList.add("bg-rose-50", "border-rose-200");
+                feedbackIcon.innerHTML = `<i data-lucide="info" class="w-5 h-5 text-rose-600"></i>`;
+                feedbackTitle.textContent = "Not quite — here's why:";
+                feedbackTitle.className = "font-bold text-base mb-1 text-rose-900";
+                feedbackExplanation.className = "text-sm leading-relaxed text-rose-800";
+            }
+            feedbackExplanation.textContent = q.explanation;
+
+            // Enable Next Button and refresh Lucide icons
+            nextQuestionBtn.disabled = false;
+            lucide.createIcons();
+        }
+
+        /**
+         * Advances to the next question or displays the final results
+         */
+        function handleNextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                renderResults();
+            }
+        }
+
+        /**
+         * Renders the Final Score and Question-by-Question Review
+         */
+        function renderResults() {
+            showScreen(resultsScreen);
+
+            const total = quizQuestions.length;
+            document.getElementById("final-score").textContent = score;
+
+            const headingEl = document.getElementById("result-heading");
+            const subtextEl = document.getElementById("result-subtext");
+
+            if (score === 5) {
+                headingEl.textContent = "Master Merchant! Perfect Score!";
+                subtextEl.textContent = "You aced every single concept of the barter system and early trade.";
+            } else if (score >= 3) {
+                headingEl.textContent = "Great Job on the Barter Quiz!";
+                subtextEl.textContent = "You have a solid grasp of why direct barter gave way to money.";
+            } else {
+                headingEl.textContent = "Good Effort! Review & Try Again";
+                subtextEl.textContent = "Check the explanations below to master the five pillars of barter.";
+            }
+
+            // Build Review List
+            const reviewList = document.getElementById("review-list");
+            reviewList.innerHTML = "";
+
+            userAnswers.forEach((entry, idx) => {
+                const q = quizQuestions[entry.questionIndex];
+                const item = document.createElement("div");
+                item.className = `p-4 rounded-2xl border ${entry.isCorrect ? "bg-emerald-50/40 border-emerald-200" : "bg-rose-50/40 border-rose-200"}`;
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 mb-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider ${entry.isCorrect ? "text-emerald-700" : "text-rose-700"}">
+                            Q${idx + 1} • ${q.topic}
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold ${entry.isCorrect ? "text-emerald-700" : "text-rose-700"}">
+                            <i data-lucide="${entry.isCorrect ? "check" : "x"}" class="w-3.5 h-3.5"></i>
+                            ${entry.isCorrect ? "Correct" : "Incorrect"}
+                        </span>
+                    </div>
+                    <p class="font-semibold text-stone-900 text-sm mb-2">${q.question}</p>
+                    <div class="text-xs space-y-1 text-stone-700">
+                        <p><span class="font-semibold">Your answer:</span> ${q.options[entry.selectedIndex]}</p>
+                        ${!entry.isCorrect ? `<p class="text-emerald-800"><span class="font-semibold">Correct answer:</span> ${q.options[q.correctIndex]}</p>` : ""}
+                    </div>
+                `;
+                reviewList.appendChild(item);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Event Listeners Initialization
+        document.addEventListener("DOMContentLoaded", () => {
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Render initial QR codes
+            const initialUrl = getInitialShareUrl();
+            renderQRCodes(initialUrl);
+
+            // Quiz flow buttons
+            document.getElementById("start-quiz-btn").addEventListener("click", startQuiz);
+            document.getElementById("next-question-btn").addEventListener("click", handleNextQuestion);
+            document.getElementById("retake-quiz-btn").addEventListener("click", startQuiz);
+            document.getElementById("quit-quiz-btn").addEventListener("click", () => showScreen(startScreen));
+
+            // QR Modal triggers
+            document.getElementById("header-qr-btn").addEventListener("click", () => openQrModal(false));
+            document.getElementById("results-share-qr-btn").addEventListener("click", () => openQrModal(false));
+            document.getElementById("start-customize-qr-btn").addEventListener("click", () => openQrModal(true));
+
+            // Modal Close triggers
+            document.getElementById("close-modal-btn").addEventListener("click", closeQrModal);
+            document.getElementById("modal-done-btn").addEventListener("click", closeQrModal);
+            qrModal.addEventListener("click", (e) => {
+                if (e.target === qrModal) closeQrModal();
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && !qrModal.classList.contains("hidden")) {
+                    closeQrModal();
+                }
+            });
+
+            // Live QR Code update when user edits the URL input
+            qrUrlInput.addEventListener("input", (e) => {
+                renderQRCodes(e.target.value);
+            });
+
+            // Copy URL to clipboard (using execCommand fallback for iframe compatibility)
+            document.getElementById("copy-url-btn").addEventListener("click", () => {
+                qrUrlInput.select();
+                qrUrlInput.setSelectionRange(0, 99999);
+                try {
+                    document.execCommand("copy");
+                    showModalToast("Quiz link copied to clipboard!");
+                } catch (err) {
+                    showModalToast("Press Ctrl+C / Cmd+C to copy the link.");
+                }
+            });
+
+            // Download QR Code PNG buttons
+            document.getElementById("start-download-qr-btn").addEventListener("click", () => downloadQRCode(startQrContainer));
+            document.getElementById("modal-download-btn").addEventListener("click", () => downloadQRCode(modalQrContainer));
+        });
+    </script>
+</body>
+</html>
